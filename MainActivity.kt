@@ -16,6 +16,7 @@ import com.group4.pulse.ui.screens.*
 import com.group4.pulse.ui.theme.*
 import com.group4.pulse.viewmodel.RadarViewModel
 
+/* Main entry point for the PULSE Android application. Hosts the Compose UI and initializes the app theme. */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,14 +28,16 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+/* Root composable that sets up the app scaffold with navigation. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RadarApp() {
     val navController = rememberNavController()
-    val viewModel: RadarViewModel = viewModel()
+    val viewModel: RadarViewModel = viewModel()  // Shared ViewModel across all screens
 
     Scaffold(
         topBar = {
+            // Centered title bar with themed colors
             CenterAlignedTopAppBar(
                 title = { Text("UWB Radar Detection System") },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -47,6 +50,7 @@ fun RadarApp() {
             RadarBottomNavigation(navController = navController)
         }
     ) { paddingValues ->
+        // Main content area with proper insets
         RadarNavHost(
             navController = navController,
             viewModel = viewModel,
@@ -58,21 +62,24 @@ fun RadarApp() {
 @Composable
 fun RadarBottomNavigation(navController: NavHostController) {
     NavigationBar {
+        // Track current route for selection highlighting
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
 
+        // Dashboard - main connection and status screen
         NavigationBarItem(
             icon = { Icon(Icons.Default.Home, contentDescription = "Dashboard") },
             label = { Text("Dashboard") },
             selected = currentRoute == "dashboard",
             onClick = {
                 navController.navigate("dashboard") {
-                    popUpTo(navController.graph.startDestinationId)
+                    popUpTo(navController.graph.startDestinationId)  // Avoid stacking duplicates
                     launchSingleTop = true
                 }
             }
         )
 
+        // Grid View - radar visualization screen
         NavigationBarItem(
             icon = { Icon(Icons.Default.LocationOn, contentDescription = "Visualize") },
             label = { Text("Grid View") },
@@ -85,6 +92,7 @@ fun RadarBottomNavigation(navController: NavHostController) {
             }
         )
 
+        // Settings - BLE configuration and app preferences
         NavigationBarItem(
             icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
             label = { Text("Settings") },
@@ -99,6 +107,7 @@ fun RadarBottomNavigation(navController: NavHostController) {
     }
 }
 
+/* All screens share the same RadarViewModel for consistent state. */
 @Composable
 fun RadarNavHost(
     navController: NavHostController,
@@ -107,17 +116,17 @@ fun RadarNavHost(
 ) {
     NavHost(
         navController = navController,
-        startDestination = "dashboard",
+        startDestination = "dashboard",  // App opens to Dashboard
         modifier = modifier
     ) {
         composable("dashboard") {
-            DashboardScreen(viewModel = viewModel)
+            DashboardScreen(viewModel = viewModel)  // BLE connection & status
         }
         composable("visualize") {
-            VisualizationScreen(viewModel = viewModel)
+            VisualizationScreen(viewModel = viewModel)  // Polar radar display
         }
         composable("settings") {
-            SettingsScreen(viewModel = viewModel)
+            SettingsScreen(viewModel = viewModel)  // Config options
         }
     }
 }
